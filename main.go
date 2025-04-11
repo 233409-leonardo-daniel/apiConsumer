@@ -2,8 +2,8 @@ package main
 
 import (
 	"apiconsumer/src/core"
-	"apiconsumer/src/order/infraestructure/adapters"
-	"apiconsumer/src/order/infraestructure/routes"
+	"apiconsumer/src/order/infrastructure/adapters"
+	"apiconsumer/src/order/infrastructure/routes"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -16,10 +16,11 @@ func main() {
 	}
 
 	orderRepo := adapters.NewMySQLRepository(db)
+	rabbitRepo := adapters.NewRabbitMQRepository()
 
 	router := gin.Default()
 
-	routes.SetupOrderRoutes(router, orderRepo)
+	routes.SetupOrderRoutes(router, orderRepo, rabbitRepo)
 
 	log.Println("Iniciando el Servidor en el puerto 8082...")
 

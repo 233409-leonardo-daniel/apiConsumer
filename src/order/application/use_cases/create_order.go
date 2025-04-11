@@ -2,7 +2,6 @@ package usecases
 
 import (
 	"apiconsumer/src/order/domain/repositories"
-	"apiconsumer/src/order/infraestructure/adapters"
 )
 
 type IOrder interface {
@@ -10,19 +9,18 @@ type IOrder interface {
 }
 
 type CreateOrder struct {
-	db repositories.IOrder
+	db     repositories.IOrder
+	rabbit repositories.IRabbitMQ
 }
 
-func NewCreateOrder(db repositories.IOrder) *CreateOrder {
-	return &CreateOrder{db: db}
+func NewCreateOrder(db repositories.IOrder, rabbit repositories.IRabbitMQ) *CreateOrder {
+	return &CreateOrder{db: db, rabbit: rabbit}
 }
 
 func (co *CreateOrder) Execute(idProduct int32, quantity int32, totalPrice float64, status string) error {
-	adapters.Execute(
-		idProduct,
-		quantity,
-		totalPrice,
-		status,
-	)
+	err := co.rabbit.Publish(idProduct, quantity, totalPrice, status)
+	if err != nil {
+		return err
+	}
 	return co.db.Save(idProduct, quantity, totalPrice, status)
 }
