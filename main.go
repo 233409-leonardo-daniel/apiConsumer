@@ -5,6 +5,7 @@ import (
 	"apiconsumer/src/order/infrastructure/adapters"
 	"apiconsumer/src/order/infrastructure/routes"
 	"log"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,13 +18,17 @@ func main() {
 
 	orderRepo := adapters.NewMySQLRepository(db)
 	rabbitRepo := adapters.NewRabbitMQRepository()
+	wsRepo := adapters.NewWebSocketRepository()
 
 	router := gin.Default()
 
-	routes.SetupOrderRoutes(router, orderRepo, rabbitRepo)
+	routes.SetupOrderRoutes(router, orderRepo, rabbitRepo, wsRepo)
+
+	go wsRepo.HandleMessages() // Iniciar el manejo de mensajes de WebSocket
+
+	http.HandleFunc("/ws", wsRepo.HandleConnections) // Manejar conexiones WebSocket
 
 	log.Println("Iniciando el Servidor en el puerto 8082...")
-
 	if err := router.Run(":8082"); err != nil {
 		log.Fatal("Error al iniciar el servidor:", err)
 	}
