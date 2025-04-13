@@ -6,20 +6,17 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"apiconsumer/src/order/domain/repositories"
-
 	"log"
 
 	"github.com/gin-gonic/gin"
 )
 
 type CreateOrderController struct {
-	useCase       *usecases.CreateOrder
-	webSocketRepo repositories.IWebSocket
+	useCase *usecases.CreateOrder
 }
 
-func NewCreateOrderController(useCase *usecases.CreateOrder, wsRepo repositories.IWebSocket) *CreateOrderController {
-	return &CreateOrderController{useCase: useCase, webSocketRepo: wsRepo}
+func NewCreateOrderController(useCase *usecases.CreateOrder) *CreateOrderController {
+	return &CreateOrderController{useCase: useCase}
 }
 
 func (co *CreateOrderController) Run(c *gin.Context) {
